@@ -12,6 +12,8 @@ class FlatSerializer(serializers.ModelSerializer):
     location = serializers.PrimaryKeyRelatedField(queryset=Location.objects.all())
     location_title = serializers.StringRelatedField(source='location', read_only=True)
     
+    owner = serializers.CharField(source='owner.email', read_only=True)
+    
     class Meta:
         model = Flat
         fields = [
