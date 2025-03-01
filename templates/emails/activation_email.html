@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: auto;
+        }
+        h2 {
+            color: #333;
+        }
+        p {
+            color: #666;
+        }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Welcome to Our Platform!</h2>
+        <p>Thank you for registering. Please activate your account by clicking the button below:</p>
+        <a href="{{ activation_url }}" class="btn">Activate Account</a>
+        <p>If the button doesn't work, you can copy and paste the following link into your browser:</p>
+        <p><a href="{{ activation_url }}">{{ activation_url }}</a></p>
+        <p>Best Regards,</p>
+        <p><strong>EasyRent Team</strong></p>
+    </div>
+</body>
+</html>

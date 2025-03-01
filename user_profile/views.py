@@ -8,7 +8,10 @@ from rest_framework.permissions import IsAuthenticated
 from .models import User
 from django.conf import settings
 from django.urls import reverse
-from django.core.mail import send_mail
+# from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 import jwt
 import datetime
 # Create your views here.
@@ -37,14 +40,19 @@ class RegistrationView(APIView):
             # Generate activation URL dynamically
             activation_url = request.build_absolute_uri(reverse('activate-account', args=[token]))
 
+            # Load email template
+            email_html_message = render_to_string('emails/activation_email.html', {'activation_url': activation_url})
+            email_plain_message = strip_tags(email_html_message)  # Plain text fallback
+
             # Send activation email
-            send_mail(
+            email = EmailMultiAlternatives(
                 subject="Activate Your Account",
-                message=f"Click the link to activate your account: {activation_url}",
+                body=email_plain_message,
                 from_email=settings.EMAIL_HOST_USER,
-                recipient_list=[user.email],
-                fail_silently=False,
+                to=[user.email],
             )
+            email.attach_alternative(email_html_message, "text/html")
+            email.send(fail_silently=False)
 
             return Response(
                 {"status": "success", "message": "User registered. Check your email to activate your account."},
