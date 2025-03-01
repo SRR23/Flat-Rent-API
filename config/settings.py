@@ -15,6 +15,9 @@ from datetime import timedelta
 import environ
 import dj_database_url
 import os
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -50,6 +53,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'user_profile',
+    'flat',
     'rest_framework',
     'rest_framework_simplejwt',
 ]
@@ -138,8 +142,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+# MEDIA_URL = '/media/'
+# MEDIA_ROOT = BASE_DIR / 'media'
 
 AUTH_USER_MODEL = 'user_profile.User'
 
@@ -174,3 +178,13 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = env("EMAIL_HOST_USER")  # Your email
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")  # Use an App Password if using Gmail
 
+
+
+
+cloudinary.config( 
+  cloud_name = env('CLOUD_NAME'), 
+  api_key = env('API_KEY'), 
+  api_secret = env('API_SECRET')
+)
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
