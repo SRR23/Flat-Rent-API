@@ -41,14 +41,20 @@ class RegistrationView(APIView):
             activation_url = request.build_absolute_uri(reverse('activate-account', args=[token]))
 
             # Load email template
-            email_html_message = render_to_string('emails/activation_email.html', {'activation_url': activation_url})
+            email_html_message = render_to_string(
+                'emails/activation_email.html', 
+                {'activation_url': activation_url}
+            )
             email_plain_message = strip_tags(email_html_message)  # Plain text fallback
+
+            # Custom sender name
+            from_email = "Support Team, EasyRent <" + settings.EMAIL_HOST_USER + ">"
 
             # Send activation email
             email = EmailMultiAlternatives(
-                subject="Activate Your Account",
+                subject="Activate Your EasyRent Account",
                 body=email_plain_message,
-                from_email=settings.EMAIL_HOST_USER,
+                from_email=from_email,
                 to=[user.email],
             )
             email.attach_alternative(email_html_message, "text/html")

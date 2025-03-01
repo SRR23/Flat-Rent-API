@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
+    <title>Activate Your EasyRent Account</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
-            text-align: center;
             padding: 20px;
+            text-align: center;
         }
         .container {
             background: #ffffff;
@@ -34,17 +36,23 @@
         .btn:hover {
             background-color: #0056b3;
         }
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #999;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Welcome to Our Platform!</h2>
-        <p>Thank you for registering. Please activate your account by clicking the button below:</p>
+        <h2>Welcome to EasyRent!</h2>
+        <p>Click the button below to activate your account:</p>
         <a href="{{ activation_url }}" class="btn">Activate Account</a>
-        <p>If the button doesn't work, you can copy and paste the following link into your browser:</p>
+        <p>If the button doesn't work, copy and paste this link into your browser:</p>
         <p><a href="{{ activation_url }}">{{ activation_url }}</a></p>
-        <p>Best Regards,</p>
-        <p><strong>EasyRent Team</strong></p>
+        <hr>
+        <p class="footer">If you didn’t sign up for EasyRent, you can ignore this email.</p>
+        <p class="footer">&copy; 2025 EasyRent. All rights reserved.</p>
     </div>
 </body>
 </html>
