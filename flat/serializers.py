@@ -51,4 +51,11 @@ class FlatSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         request = self.context.get('request')
         validated_data['owner'] = request.user  # Assign the logged-in owner
+        
+        # When Django REST Framework (DRF) processes a POST request, 
+        # if the available field is not explicitly included in the request data, 
+        # it may default to False.
+        if 'available' not in validated_data:
+            validated_data['available'] = True  # Ensure default is True if not provided
+            
         return super().create(validated_data)
