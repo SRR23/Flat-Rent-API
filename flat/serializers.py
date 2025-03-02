@@ -14,6 +14,8 @@ class FlatSerializer(serializers.ModelSerializer):
     
     owner = serializers.CharField(source='owner.email', read_only=True)
     
+    available = serializers.BooleanField(required=False, default=True)
+    
     class Meta:
         model = Flat
         fields = [
@@ -55,7 +57,6 @@ class FlatSerializer(serializers.ModelSerializer):
         # When Django REST Framework (DRF) processes a POST request, 
         # if the available field is not explicitly included in the request data, 
         # it may default to False.
-        if 'available' not in validated_data:
-            validated_data['available'] = True  # Ensure default is True if not provided
+        validated_data.setdefault('available', True)  # Ensures default = True if not provided
             
         return super().create(validated_data)
