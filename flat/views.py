@@ -1,4 +1,5 @@
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.generics import RetrieveAPIView, ListAPIView
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
@@ -19,7 +20,7 @@ class AddFlatView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
-class FlatListView(APIView):
+class OwnerFlatListView(APIView):
     """ List all flats added by the logged-in owner """
     permission_classes = [IsAuthenticated]
 
@@ -60,3 +61,16 @@ class FlatUpdateDeleteView(APIView):
 
         flat.delete()
         return Response({"message": "Flat deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+
+
+class FlatDetailView(RetrieveAPIView):
+    queryset = Flat.objects.all()
+    serializer_class = FlatSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]  # Anyone can view flat details
+    lookup_field = "slug"  # Use flat slug to retrieve details
+
+
+class FlatListView(ListAPIView):
+    queryset = Flat.objects.all()
+    serializer_class = FlatSerializer
+    permission_classes = [AllowAny]  # Public access

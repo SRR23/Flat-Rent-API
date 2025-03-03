@@ -1,12 +1,16 @@
 from django.urls import path
 from .views import (
     AddFlatView,
-    FlatListView,
-    FlatUpdateDeleteView
+    OwnerFlatListView,
+    FlatUpdateDeleteView,
+    FlatDetailView,
+    FlatListView
 )
 
 urlpatterns = [
     path('flats/add/', AddFlatView.as_view(), name='add-flat'),
-    path('flats/', FlatListView.as_view(), name='list-flats'),
+    path('flats/', OwnerFlatListView.as_view(), name='list-owner-flats'),
     path('flats/<int:flat_id>/', FlatUpdateDeleteView.as_view(), name='update-delete-flat'),
+    path('all_flats/', FlatListView.as_view(), name='list-flats'),
+    path('flat_details/<str:slug>/', FlatDetailView.as_view(), name='flta-details'),
 ]

@@ -1,9 +1,17 @@
 from rest_framework import serializers
+from user_profile.models import User
 from .models import (
     Flat,
     Category,
     Location
 )
+
+
+class OwnerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'phone_number', 'email']  # Include necessar
+        
 
 class FlatSerializer(serializers.ModelSerializer):
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
@@ -12,7 +20,7 @@ class FlatSerializer(serializers.ModelSerializer):
     location = serializers.PrimaryKeyRelatedField(queryset=Location.objects.all())
     location_title = serializers.StringRelatedField(source='location', read_only=True)
     
-    owner = serializers.CharField(source='owner.email', read_only=True)
+    owner = OwnerSerializer(source='owner', read_only=True)  # Nested serializer
     
     
     class Meta:
@@ -55,3 +63,7 @@ class FlatSerializer(serializers.ModelSerializer):
         validated_data['owner'] = request.user  # Assign the logged-in owner
             
         return super().create(validated_data)
+
+
+    
+
