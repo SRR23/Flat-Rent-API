@@ -65,5 +65,11 @@ class FlatSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 
+class MessageSerializer(serializers.Serializer):
+    first_name = serializers.CharField(max_length=255)
+    last_name = serializers.CharField(max_length=255)
+    email = serializers.EmailField()
+    phone = serializers.CharField(max_length=20)
+    message = serializers.CharField(max_length=1000)
     
 

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background: #007bff;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 5px 5px 0 0;
+        }
+        .content {
+            padding: 15px;
+            font-size: 16px;
+            color: #333;
+        }
+        .footer {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #888;
+            text-align: center;
+        }
+        .btn {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">Flat Rental Inquiry</div>
+        <div class="content">
+            <p>Hello <strong>{{ owner_name }}</strong>,</p>
+            <p>A renter is interested in your flat: <strong>{{ flat_title }}</strong>.</p>
+            
+            <h3>Renter Details:</h3>
+            <p><strong>Name:</strong> {{ first_name }} {{ last_name }}</p>
+            <p><strong>Email:</strong> {{ email }}</p>
+            <p><strong>Phone:</strong> {{ phone }}</p>
+
+            <h3>Message:</h3>
+            <p>{{ message }}</p>
+
+            <p>You can contact the renter for further details.</p>
+            <a href="mailto:{{ email }}" class="btn">Reply to Renter</a>
+        </div>
+        <div class="footer">
+            &copy; 2024 Flat Rental Website. All Rights Reserved.
+        </div>
+    </div>
+</body>
+</html>

@@ -1,10 +1,18 @@
 from rest_framework.generics import RetrieveAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
+from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.conf import settings
 from rest_framework import status
 from rest_framework.views import APIView
+
 from .models import Flat
-from .serializers import FlatSerializer
+from .serializers import (
+    FlatSerializer,
+    MessageSerializer
+)
 
 class AddFlatView(APIView):
     permission_classes = [IsAuthenticated]
@@ -74,3 +82,45 @@ class FlatListView(ListAPIView):
     queryset = Flat.objects.all()
     serializer_class = FlatSerializer
     permission_classes = [AllowAny]  # Public access
+
+
+class SendMessageView(APIView):
+    permission_classes = [IsAuthenticated]  # ✅ Only logged-in renters can send messages
+
+    def post(self, request, slug):
+        flat = get_object_or_404(Flat, slug=slug)  # Get the flat using slug
+        owner_email = flat.owner.email  # Get owner's email
+
+        serializer = MessageSerializer(data=request.data)
+        if serializer.is_valid():
+            first_name = serializer.validated_data['first_name']
+            last_name = serializer.validated_data['last_name']
+            email = serializer.validated_data['email']
+            phone = serializer.validated_data['phone']
+            message = serializer.validated_data['message']
+
+            # 🛠️ Render HTML email template with dynamic data
+            email_html_content = render_to_string('emails/booking_email.html', {
+                'owner_name': flat.owner.first_name,
+                'flat_title': flat.title,
+                'first_name': first_name,
+                'last_name': last_name,
+                'email': email,
+                'phone': phone,
+                'message': message
+            })
+
+            subject = f"Message from {first_name} {last_name} - Interested in Your Flat"
+            
+            # Send email with both HTML & plain text versions
+            email_msg = EmailMultiAlternatives(
+                subject,
+                message,  # Plain text version (fallback)
+                settings.EMAIL_HOST_USER,  # ✅ Use sender email dynamically
+                [owner_email]
+            )
+            email_msg.attach_alternative(email_html_content, "text/html")
+            email_msg.send()
+
+            return Response({'success': 'Message sent successfully'}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -4,7 +4,8 @@ from .views import (
     OwnerFlatListView,
     FlatUpdateDeleteView,
     FlatDetailView,
-    FlatListView
+    FlatListView,
+    SendMessageView
 )
 
 urlpatterns = [
@@ -13,4 +14,5 @@ urlpatterns = [
     path('flats/<int:flat_id>/', FlatUpdateDeleteView.as_view(), name='update-delete-flat'),
     path('all_flats/', FlatListView.as_view(), name='list-flats'),
     path('flat_details/<str:slug>/', FlatDetailView.as_view(), name='flta-details'),
+    path('send_message/<slug:slug>/', SendMessageView.as_view(), name='send-message'),
 ]
