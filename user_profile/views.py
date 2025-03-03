@@ -48,7 +48,7 @@ class RegistrationView(APIView):
             email_plain_message = strip_tags(email_html_message)  # Plain text fallback
 
             # Custom sender name
-            from_email = f'"Support Team EasyRent" <{settings.EMAIL_HOST_USER}>'
+            from_email = f'"EasyRent Support Team" <{settings.EMAIL_HOST_USER}>'
 
             # Send activation email
             email = EmailMultiAlternatives(

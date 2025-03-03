@@ -91,6 +91,10 @@ class SendMessageView(APIView):
         flat = get_object_or_404(Flat, slug=slug)  # Get the flat using slug
         owner_email = flat.owner.email  # Get owner's email
 
+        # 🔹 Check if the logged-in renter has already sent a message for this flat
+        if request.user in flat.renters_who_messaged.all():
+            return Response({'error': 'You have already sent a message for this flat.'}, status=status.HTTP_400_BAD_REQUEST)
+
         serializer = MessageSerializer(data=request.data)
         if serializer.is_valid():
             first_name = serializer.validated_data['first_name']
@@ -111,16 +115,20 @@ class SendMessageView(APIView):
             })
 
             subject = f"Message from {first_name} {last_name} - Interested in Your Flat"
-            
+
             # Send email with both HTML & plain text versions
             email_msg = EmailMultiAlternatives(
                 subject,
                 message,  # Plain text version (fallback)
-                settings.EMAIL_HOST_USER,  # ✅ Use sender email dynamically
+                f"EasyRent Support Team <{settings.EMAIL_HOST_USER}>",  # ✅ Shows "EasyRent" before sender email
                 [owner_email]
             )
             email_msg.attach_alternative(email_html_content, "text/html")
             email_msg.send()
 
+            # 🔹 Mark renter as someone who has already sent a message
+            flat.renters_who_messaged.add(request.user)
+
             return Response({'success': 'Message sent successfully'}, status=status.HTTP_200_OK)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

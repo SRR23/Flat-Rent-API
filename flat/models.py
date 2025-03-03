@@ -34,6 +34,7 @@ class Location(models.Model):
 
 class Flat(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="flats")
+    renters_who_messaged = models.ManyToManyField(User, blank=True, related_name="messaged_flats")  # New field
     category = models.ForeignKey(
         Category, related_name="category_flats", on_delete=models.CASCADE
     )
