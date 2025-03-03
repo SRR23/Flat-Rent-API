@@ -20,7 +20,7 @@ class FlatSerializer(serializers.ModelSerializer):
     location = serializers.PrimaryKeyRelatedField(queryset=Location.objects.all())
     location_title = serializers.StringRelatedField(source='location', read_only=True)
     
-    owner = OwnerSerializer(source='owner', read_only=True)  # Nested serializer
+    owner = OwnerSerializer(read_only=True)  # Nested serializer
     
     
     class Meta:
