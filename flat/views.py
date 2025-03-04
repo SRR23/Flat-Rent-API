@@ -155,3 +155,24 @@ class SendMessageView(APIView):
             return Response({'success': 'Message sent successfully'}, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# Filter Blogs by category
+# Optimized for performance
+class FlatCategoryFilterView(ListAPIView):
+    serializer_class = FlatSerializer
+
+    def get_queryset(self):
+        # Get the category ID from query params
+        category_id = self.request.query_params.get('category', None)
+        
+        # If no category_id is provided, return an empty queryset
+        if category_id is None:
+            return Flat.objects.none()
+
+        # Filter the Flats by category ID
+        queryset = Flat.objects.select_related('category', 'owner') \
+                                 .filter(category__id=category_id) \
+                                 .order_by('created_date')
+        
+        return queryset
