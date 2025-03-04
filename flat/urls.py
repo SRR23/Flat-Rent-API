@@ -20,5 +20,5 @@ urlpatterns = [
     path('all_flats/', FlatListView.as_view(), name='list-flats'),
     path('flat_details/<str:slug>/', FlatDetailView.as_view(), name='flta-details'),
     path('send_message/<slug:slug>/', SendMessageView.as_view(), name='send-message'),
-    path('filter-category/', FlatCategoryFilterView.as_view(), name='category'),
+    path('filter_category/', FlatCategoryFilterView.as_view(), name='category'),
 ]
