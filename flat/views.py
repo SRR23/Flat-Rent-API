@@ -1,4 +1,4 @@
-from rest_framework.generics import RetrieveAPIView, ListAPIView
+from rest_framework.generics import RetrieveAPIView, ListAPIView, DestroyAPIView
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
@@ -41,7 +41,7 @@ class OwnerFlatListView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
 
-class FlatUpdateDeleteView(APIView):
+class OwnerFlatUpdateDeleteView(APIView):
     """ Update or delete a specific flat (only by its owner) """
     permission_classes = [IsAuthenticated]
 
@@ -70,6 +70,29 @@ class FlatUpdateDeleteView(APIView):
         flat.delete()
         return Response({"message": "Flat deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
 
+
+class RenterBookingListView(ListAPIView):
+    """✅ View for renters to see their booked flats"""
+    permission_classes = [IsAuthenticated]  # Only logged-in renters
+    serializer_class = FlatSerializer
+
+    def get_queryset(self):
+        return self.request.user.messaged_flats.all()  # Fetch booked flats
+
+
+class RenterBookingDeleteView(DestroyAPIView):
+    """✅ View for renters to delete their booking"""
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, slug):
+        flat = get_object_or_404(Flat, slug=slug)
+
+        if request.user in flat.renters_who_messaged.all():
+            flat.renters_who_messaged.remove(request.user)  # Remove the renter
+            return Response({"success": "Booking removed"}, status=status.HTTP_204_NO_CONTENT)
+        
+        return Response({"error": "You have not booked this flat"}, status=status.HTTP_400_BAD_REQUEST)
+    
 
 class FlatDetailView(RetrieveAPIView):
     queryset = Flat.objects.all()
