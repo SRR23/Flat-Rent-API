@@ -173,6 +173,6 @@ class FlatCategoryFilterView(ListAPIView):
         # Filter the Flats by category ID
         queryset = Flat.objects.select_related('category', 'owner') \
                                  .filter(category__id=category_id) \
-                                 .order_by('created_date')
+                                 .order_by('created_at')
         
         return queryset
