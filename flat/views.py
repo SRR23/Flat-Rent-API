@@ -1,6 +1,7 @@
 from rest_framework.generics import RetrieveAPIView, ListAPIView, DestroyAPIView
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
 from django.shortcuts import get_object_or_404
+from django.db.models import Q
 from rest_framework.response import Response
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
@@ -174,5 +175,32 @@ class FlatCategoryFilterView(ListAPIView):
         queryset = Flat.objects.select_related('category', 'owner') \
                                  .filter(category__id=category_id) \
                                  .order_by('created_at')
-        
+                                 
         return queryset
+
+
+# 🔍 Why Not Use SearchFilter?
+# The SearchFilter from Django REST Framework (DRF) is great for full-text search across multiple fields 
+# using a single query parameter. However, in your case, you need filtering by specific fields 
+# (category and location separately), which is better handled using Django's filter() method.
+
+class FlatSearchView(ListAPIView):
+    serializer_class = FlatSerializer
+
+    def get_queryset(self):
+        queryset = Flat.objects.select_related('category', 'location', 'owner')
+
+        category_query = self.request.query_params.get('category', None)
+        location_query = self.request.query_params.get('location', None)
+
+        if category_query and location_query:
+            queryset = queryset.filter(
+                Q(category__title__icontains=category_query) &  # Filter by category
+                Q(location__name__icontains=location_query)     # Filter by location
+            )
+        elif category_query:
+            queryset = queryset.filter(Q(category__title__icontains=category_query))
+        elif location_query:
+            queryset = queryset.filter(Q(location__name__icontains=location_query))
+
+        return queryset.distinct()
