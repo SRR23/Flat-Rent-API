@@ -196,7 +196,7 @@ class FlatSearchView(ListAPIView):
         if category_query and location_query:
             queryset = queryset.filter(
                 Q(category__title__icontains=category_query) &  # Filter by category
-                Q(location__name__icontains=location_query)     # Filter by location
+                Q(location__title__icontains=location_query)     # Filter by location
             )
         elif category_query:
             queryset = queryset.filter(Q(category__title__icontains=category_query))
