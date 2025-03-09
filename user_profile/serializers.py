@@ -21,8 +21,9 @@ class RegisterSerializer(serializers.ModelSerializer):
         if data['password'] != data['confirm_password']:
             raise serializers.ValidationError({"password": "Passwords do not match."})
 
-        if data['user_type'] == "owner":  # Check if user is an owner
-            if 'house_holding_number' not in data or 'address' not in data:
+        user_type = data['user_type'].lower()  # Normalize user type
+        if user_type == "owner":  
+            if not data.get('house_holding_number') or not data.get('address'):
                 raise serializers.ValidationError(
                     {"error": "Owners must provide house holding number and address."}
                 )
@@ -37,12 +38,13 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data)
 
         # ✅ Store extra fields for owners
-        if user.user_type == "owner":
+        if user.user_type.lower() == "owner":
             user.house_holding_number = house_holding_number
             user.address = address
             user.save()
 
         return user
+
 
 
 

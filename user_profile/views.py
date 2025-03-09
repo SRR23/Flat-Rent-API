@@ -26,6 +26,7 @@ class RegistrationView(APIView):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
             user_data = serializer.validated_data
+            user_data.pop('confirm_password')  # ✅ Remove confirm_password for all users
 
             # ✅ Ensure required owner fields are stored properly
             if user_data['user_type'] == 'owner':
@@ -40,7 +41,7 @@ class RegistrationView(APIView):
                     address=user_data.get('address', '')
                 )
             else:
-                user = User.objects.create_user(**user_data)
+                user = User.objects.create_user(**user_data)  # ✅ Now confirm_password is removed
 
             user.is_active = False  # Deactivate until email confirmation
             user.save()
@@ -64,7 +65,7 @@ class RegistrationView(APIView):
             email_plain_message = strip_tags(email_html_message)  # Plain text fallback
 
             # Custom sender name
-            from_email = f'"EasyRent Support Team" <{settings.EMAIL_HOST_USER}>'
+            from_email = f'"EasyRent Support Team" <{settings.EMAIL_HOST_USER}>'  # 📨
 
             # Send activation email
             email = EmailMultiAlternatives(
@@ -82,6 +83,7 @@ class RegistrationView(APIView):
             )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
     
 
