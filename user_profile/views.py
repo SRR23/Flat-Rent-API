@@ -25,11 +25,27 @@ class RegistrationView(APIView):
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
-            user = serializer.save()
-            user.is_active = False  # Deactivate the user until email confirmation
+            user_data = serializer.validated_data
+
+            # ✅ Ensure required owner fields are stored properly
+            if user_data['user_type'] == 'owner':
+                user = User.objects.create_user(
+                    user_type=user_data['user_type'],
+                    first_name=user_data['first_name'],
+                    last_name=user_data['last_name'],
+                    email=user_data['email'],
+                    phone_number=user_data['phone_number'],
+                    password=user_data['password'],
+                    house_holding_number=user_data.get('house_holding_number', ''),
+                    address=user_data.get('address', '')
+                )
+            else:
+                user = User.objects.create_user(**user_data)
+
+            user.is_active = False  # Deactivate until email confirmation
             user.save()
 
-            # Generate activation token
+            # 🔐 Generate activation token (expires in 24 hours)
             expiration_time = datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=24)
             token = jwt.encode(
                 {"user_id": user.id, "exp": expiration_time},
@@ -37,12 +53,12 @@ class RegistrationView(APIView):
                 algorithm="HS256"
             )
 
-            # Generate activation URL dynamically
+            # 📩 Generate activation URL dynamically
             activation_url = request.build_absolute_uri(reverse('activate-account', args=[token]))
 
-            # Load email template
+            # 📧 Load email template
             email_html_message = render_to_string(
-                'emails/activation_email.html', 
+                'emails/activation_email.html',
                 {'activation_url': activation_url}
             )
             email_plain_message = strip_tags(email_html_message)  # Plain text fallback
@@ -66,6 +82,7 @@ class RegistrationView(APIView):
             )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     
 
 class ActivateAccountView(APIView):
