@@ -70,30 +70,20 @@ class Flat(models.Model):
     # price = models.DecimalField(max_digits=10, decimal_places=2)
     available = models.BooleanField(default=True)
     created_at = models.DateField(auto_now_add=True)
-    updated_at = models.DateField(auto_now_add=True)
+    updated_at = models.DateField(auto_now=True)
 
     def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
-        # Generate a unique slug for the blog
-        # This method is called before saving the object
-        # It checks if the object is being updated or created
-        # If the object is being updated, it checks if the title has changed
-        # If the title has changed, it generates a new slug
-        # If the object is new, it generates a new slug
-
-        updating = self.pk is not None  # Check if the object is being updated
-
-        if updating:
-            # Fetch the original object to check if the title has changed
-            original = Flat.objects.get(pk=self.pk)
-            if original.title != self.title:  # Check if the title has changed
-                self.slug = generate_unique_slug(
-                    self, self.title, update=True
-                )  # Generate a new slug
+        """🔹 Optimized save method to prevent unnecessary queries."""
+        if self.pk:
+            # Fetch only title, avoid full object retrieval
+            original_title = self.__class__.objects.filter(pk=self.pk).values_list('title', flat=True).first()
+            if original_title and original_title != self.title:
+                self.slug = generate_unique_slug(self, self.title, update=True)
         else:
-            # Generate slug only for new objects
             self.slug = generate_unique_slug(self, self.title)
 
         super().save(*args, **kwargs)
+

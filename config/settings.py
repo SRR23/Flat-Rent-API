@@ -35,7 +35,7 @@ environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     "flat-rent-api.onrender.com",  # Custom domain (without https://)
@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'flat',
     'rest_framework',
     'rest_framework_simplejwt',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -66,6 +67,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 'querycount.middleware.QueryCountMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -188,3 +190,24 @@ cloudinary.config(
 )
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+
+CORS_ALLOWED_ORIGINS = [
+    "https://easyrent-kushtia.netlify.app/",
+    "http://localhost:5173",
+]
+
+CORS_ALLOW_CREDENTIALS = True  # Crucial for JWT
+
+
+CORS_ALLOW_HEADERS = (
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+)

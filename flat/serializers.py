@@ -6,6 +6,19 @@ from .models import (
     Location
 )
 
+# Category Serializer
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['id', 'title', 'slug']
+
+
+# Location Serializer
+class LocationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Location
+        fields = ['id', 'title', 'slug']
+
 
 class OwnerSerializer(serializers.ModelSerializer):
     class Meta:
