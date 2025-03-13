@@ -1,4 +1,4 @@
-import logging
+
 
 from rest_framework.generics import RetrieveAPIView, ListAPIView, DestroyAPIView
 from rest_framework.permissions import (
@@ -100,7 +100,7 @@ class OwnerFlatListView(ListAPIView):
         return super().list(request, *args, **kwargs)
 
 
-logger = logging.getLogger(__name__)
+
 class OwnerFlatUpdateDeleteView(APIView):
     """ Update or delete a specific flat (only by its owner) """
     permission_classes = [IsAuthenticated]
