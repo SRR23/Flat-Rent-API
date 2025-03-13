@@ -51,6 +51,7 @@ class FlatSerializer(serializers.ModelSerializer):
             'room',
             'bath',
             'kitchen',
+            'price',
             'image_1',
             'image_2',
             'image_3',

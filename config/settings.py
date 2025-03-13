@@ -194,7 +194,7 @@ DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 
 CORS_ALLOWED_ORIGINS = [
-    "https://easyrent-kushtia.netlify.app/",
+    "https://easyrent-kushtia.netlify.app",
     "http://localhost:5173",
 ]
 

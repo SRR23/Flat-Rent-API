@@ -48,6 +48,7 @@ class Flat(models.Model):
     room = models.IntegerField()
     bath = models.IntegerField()
     kitchen = models.IntegerField()
+    price = models.IntegerField(default=0)
 
     # Cloudinary Image Fields
     image_1 = CloudinaryField("image", blank=True, null=True)
