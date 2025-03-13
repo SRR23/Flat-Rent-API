@@ -88,29 +88,30 @@ class Flat(models.Model):
             self.slug = generate_unique_slug(self, self.title)
 
         super().save(*args, **kwargs)
-    
+        
     
     def delete(self, *args, **kwargs):
         # Handle image_1
         if self.image_1:
-            public_id_1 = self.image_1.name.split('/')[-1].split('.')[0]
+            public_id_1 = self.image_1.public_id  # FIXED
             destroy(public_id_1)
 
         # Handle image_2
         if self.image_2:
-            public_id_2 = self.image_2.name.split('/')[-1].split('.')[0]
+            public_id_2 = self.image_2.public_id  # FIXED
             destroy(public_id_2)
 
         # Handle image_3
         if self.image_3:
-            public_id_3 = self.image_3.name.split('/')[-1].split('.')[0]
+            public_id_3 = self.image_3.public_id  # FIXED
             destroy(public_id_3)
 
         # Handle image_4
         if self.image_4:
-            public_id_4 = self.image_4.name.split('/')[-1].split('.')[0]
+            public_id_4 = self.image_4.public_id  # FIXED
             destroy(public_id_4)
 
         # Call the parent class delete method to remove the record from the database
         super().delete(*args, **kwargs)
+
 
