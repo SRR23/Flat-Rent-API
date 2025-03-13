@@ -66,7 +66,7 @@ class FlatSerializer(serializers.ModelSerializer):
             'description_3',
             'description_4',
             'description_5',
-            'available',
+            # 'available',
             'created_at',
             'updated_at'
         ]
