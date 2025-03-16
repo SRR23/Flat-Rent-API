@@ -12,6 +12,7 @@ from django.urls import reverse
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+from django.http import HttpResponseRedirect
 import jwt
 import datetime
 # Create your views here.
@@ -104,10 +105,8 @@ class ActivateAccountView(APIView):
             user.is_active = True
             user.save()
             
-            return Response(
-                {"status": "success", "message": "Account activated successfully. You can now log in."},
-                status=status.HTTP_200_OK
-            )
+            # Redirect to the login page
+            return HttpResponseRedirect('https://flat-rent-api.onrender.com/api/login/')  # Redirects the user to the login page
 
         except jwt.ExpiredSignatureError:
             return Response({"status": "error", "message": "Activation link expired."}, status=status.HTTP_400_BAD_REQUEST)
