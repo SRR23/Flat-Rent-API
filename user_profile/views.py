@@ -12,7 +12,7 @@ from django.urls import reverse
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
-from django.http import HttpResponseRedirect
+from django.shortcuts import redirect
 import jwt
 import datetime
 # Create your views here.
@@ -106,7 +106,7 @@ class ActivateAccountView(APIView):
             user.save()
             
             # Redirect to the login page
-            return HttpResponseRedirect('https://easyrent-kushtia.netlify.app/login/')  # Redirects the user to the login page
+            return redirect('https://easyrent-kushtia.netlify.app/login/')  # Correct redirect
 
         except jwt.ExpiredSignatureError:
             return Response({"status": "error", "message": "Activation link expired."}, status=status.HTTP_400_BAD_REQUEST)
