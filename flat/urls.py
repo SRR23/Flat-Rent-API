@@ -14,6 +14,7 @@ from .views import (
     CategoryListView,
     LocationListView,
     HomeView,
+    ContactFormView,
 )
 
 urlpatterns = [
@@ -30,4 +31,5 @@ urlpatterns = [
     path('search/', FlatSearchView.as_view(), name='search'),
     path('categories/', CategoryListView.as_view(), name='categories'),
     path('locations/', LocationListView.as_view(), name='locations'),
+    path('contact/', ContactFormView.as_view(), name='contact'),
 ]

@@ -85,5 +85,13 @@ class MessageSerializer(serializers.Serializer):
     email = serializers.EmailField()
     phone = serializers.CharField(max_length=20)
     message = serializers.CharField(max_length=1000)
+
+
+class ContactFormSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=100)
+    email = serializers.EmailField()
+    phone = serializers.CharField(max_length=20)
+    address = serializers.CharField(max_length=255, required=False)
+    message = serializers.CharField()
     
 

@@ -9,7 +9,7 @@ from rest_framework.permissions import (
 from rest_framework.exceptions import ValidationError
 from django.db.models import Q, Exists, OuterRef
 from rest_framework.response import Response
-from django.core.mail import EmailMultiAlternatives
+from django.core.mail import EmailMultiAlternatives, send_mail
 from django.template.loader import render_to_string
 from django.conf import settings
 from rest_framework import status, pagination
@@ -24,7 +24,8 @@ from .serializers import (
     FlatSerializer, 
     MessageSerializer,
     CategorySerializer,
-    LocationSerializer
+    LocationSerializer,
+    ContactFormSerializer
     
 )
 
@@ -340,3 +341,34 @@ class FlatSearchView(ListAPIView):
             queryset = queryset.filter(Q(location__title__icontains=location_query))
 
         return queryset.distinct()
+
+
+class ContactFormView(APIView):
+    def post(self, request):
+        serializer = ContactFormSerializer(data=request.data)
+        if serializer.is_valid():
+            name = serializer.validated_data["name"]
+            email = serializer.validated_data["email"]
+            phone = serializer.validated_data["phone"]
+            address = serializer.validated_data["address"]
+            message = serializer.validated_data["message"]
+
+            # Render email template
+            email_body = render_to_string('emails/contact_email.html', {
+                'name': name,
+                'email': email,
+                'phone': phone,
+                'address': address,
+                'message': message,
+            })
+
+            send_mail(
+                subject=f"New Contact Message from {name}",
+                message="This is a plain text fallback message.",
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=['iamremon807@gmail.com'],
+                html_message=email_body,  # HTML formatted email
+            )
+
+            return Response({"message": "Email sent successfully!"}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

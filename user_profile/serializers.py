@@ -52,7 +52,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'user_type', 'first_name', 'last_name', 'phone_number', 'email']
-        read_only_fields = ['email']
+        read_only_fields = ['email', 'user_type']  # ✅ Make email, user_type read-only
 
     def to_representation(self, instance):
         """✅ Dynamically include extra fields for owners"""
