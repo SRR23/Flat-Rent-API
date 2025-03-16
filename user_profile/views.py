@@ -106,7 +106,7 @@ class ActivateAccountView(APIView):
             user.save()
             
             # Redirect to the login page
-            return HttpResponseRedirect('https://flat-rent-api.onrender.com/api/login/')  # Redirects the user to the login page
+            return HttpResponseRedirect('https://easyrent-kushtia.netlify.app/login/')  # Redirects the user to the login page
 
         except jwt.ExpiredSignatureError:
             return Response({"status": "error", "message": "Activation link expired."}, status=status.HTTP_400_BAD_REQUEST)
