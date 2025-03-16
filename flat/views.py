@@ -32,12 +32,12 @@ from .serializers import (
 
 # Custom pagination class
 class PaginationView(pagination.PageNumberPagination):
-    page_size = 2  # Default page size
+    page_size = 9  # Default page size
     page_size_query_param = 'page_size'
 
     def get_max_page_size(self, total_records):
         """Dynamically set max page size based on total records."""
-        return max(50, total_records // 2)  # Ensures at least 50
+        return max(50, total_records // 9)  # Ensures at least 50
 
     def paginate_queryset(self, queryset, request, view=None):
         total_records = len(queryset)  # Total data count
