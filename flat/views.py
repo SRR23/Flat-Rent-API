@@ -43,6 +43,28 @@ class PaginationView(pagination.PageNumberPagination):
         self.max_page_size = self.get_max_page_size(total_records)  # Set max dynamically
         return super().paginate_queryset(queryset, request, view)
     
+    def get_paginated_response(self, data):
+        """Customize paginated response to include page links."""
+        return Response({
+            "count": self.page.paginator.count,  # Total items
+            "total_pages": self.page.paginator.num_pages,  # Total pages
+            "current_page": self.page.number,  # Current page number
+            "page_size": self.page.paginator.per_page,  # Items per page
+            "next": self.get_next_link(),  # Next page URL
+            "previous": self.get_previous_link(),  # Previous page URL
+            "results": data  # Paginated results
+        })
+
+
+class HomeView(ListAPIView):
+    
+    queryset = (
+        Flat.objects.select_related("owner", "category", "location")
+        # .prefetch_related("renters_who_messaged")
+        .order_by("-created_at")[:6]  # Limit to latest 6 flats
+    )
+    serializer_class = FlatSerializer
+    permission_classes = [AllowAny]
 
 # List all Categories
 class CategoryListView(ListAPIView):
