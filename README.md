@@ -6,14 +6,14 @@ This is a RESTful API for a flat rent platform built with Django and Django Rest
 
 ## Features
 
-- User authentication (registration, login)
-- Owners and Renters have individual registration system
-- Confirmation mail for activate account
-- CRUD operations for flat information posts
-- Booking system for flats via sending email
-- add to booking list functionality
-- Search and filtering for flats
-- Token-based authentication
+- User authentication (registration, login).
+- Owners and Renters have individual registration system.
+- Confirmation mail for activate account.
+- CRUD operations for flat information posts.
+- Booking system for flats via sending email.
+- add to booking list functionality.
+- Search and filtering for flats.
+- Token-based authentication.
 
 ## Installation
 
