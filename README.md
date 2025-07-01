@@ -24,7 +24,7 @@ Follow these steps to set up and run the project locally:
     First, clone the repository from GitHub:
 
     git clone https://github.com/SRR23/Flat-Rent-API.git
-    cd config
+    cd Flat-Rent-API
 
     2. Set Up a Virtual Environment
     Create and activate a virtual environment:
