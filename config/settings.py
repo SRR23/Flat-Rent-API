@@ -39,7 +39,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     "flat-rent-api.onrender.com",  # Custom domain (without https://)
-    "127.0.0.1",              # Localhost for development
+    "localhost",              # Localhost for development
 ]
 
 
