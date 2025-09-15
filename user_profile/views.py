@@ -14,7 +14,8 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.shortcuts import redirect
 import jwt
-import datetime
+from datetime import timedelta
+from django.utils import timezone
 # Create your views here.
 from .serializers import (
     RegisterSerializer,
@@ -27,9 +28,8 @@ class RegistrationView(APIView):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
             user_data = serializer.validated_data
-            user_data.pop('confirm_password')  # ✅ Remove confirm_password for all users
+            user_data.pop('confirm_password')
 
-            # ✅ Ensure required owner fields are stored properly
             if user_data['user_type'] == 'owner':
                 user = User.objects.create_user(
                     user_type=user_data['user_type'],
@@ -42,33 +42,30 @@ class RegistrationView(APIView):
                     address=user_data.get('address', '')
                 )
             else:
-                user = User.objects.create_user(**user_data)  # ✅ Now confirm_password is removed
+                user = User.objects.create_user(**user_data)
 
-            user.is_active = False  # Deactivate until email confirmation
+            user.is_active = False
             user.save()
 
-            # 🔐 Generate activation token (expires in 24 hours)
-            expiration_time = datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=24)
+            # 🔐 Generate activation token (expires in 24 hours) - FIXED
+            expiration_time = timezone.now() + timedelta(hours=24)
             token = jwt.encode(
                 {"user_id": user.id, "exp": expiration_time},
                 settings.SECRET_KEY,
                 algorithm="HS256"
             )
 
-            # 📩 Generate activation URL dynamically
+            # Rest of your code remains the same...
             activation_url = request.build_absolute_uri(reverse('activate-account', args=[token]))
-
-            # 📧 Load email template
+            
             email_html_message = render_to_string(
                 'emails/activation_email.html',
                 {'activation_url': activation_url}
             )
-            email_plain_message = strip_tags(email_html_message)  # Plain text fallback
-
-            # Custom sender name
-            from_email = f'"EasyRent Support Team" <{settings.EMAIL_HOST_USER}>'  # 📨
-
-            # Send activation email
+            email_plain_message = strip_tags(email_html_message)
+            
+            from_email = f'"EasyRent Support Team" <{settings.EMAIL_HOST_USER}>'
+            
             email = EmailMultiAlternatives(
                 subject="Activate Your EasyRent Account",
                 body=email_plain_message,

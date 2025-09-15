@@ -95,19 +95,19 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
 DATABASES = {
-    'default': dj_database_url.config(
-        default=env('DATABASE_URL'),
-        conn_max_age=600,
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
+
+# DATABASES = {
+#     'default': dj_database_url.config(
+#         default=env('DATABASE_URL'),
+#         conn_max_age=600,
+#     )
+# }
 
 
 # Password validation
@@ -158,7 +158,7 @@ REST_FRAMEWORK = {
 
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),  # Set the access token lifetime
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=85),  # Set the access token lifetime
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),    # Set the refresh token lifetime
     'ROTATE_REFRESH_TOKENS': False,                # Set to True if you want to issue a new refresh token on access token refresh
     'BLACKLIST_AFTER_ROTATION': True,              # Set to True if you want old refresh tokens to become invalid after use

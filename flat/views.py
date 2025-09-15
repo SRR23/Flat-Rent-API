@@ -1,5 +1,5 @@
 
-
+import logging
 from rest_framework.generics import RetrieveAPIView, ListAPIView, DestroyAPIView
 from rest_framework.permissions import (
     IsAuthenticated,
@@ -20,15 +20,21 @@ from .models import (
     Category, 
     Location
 )
-from .serializers import (
-    FlatSerializer, 
+from flat.serializers.all_flat import (
+    FlatSerializer,
+    FamilySerializer, 
+    BachelorSerializer, 
+    ShopSerializer,
     MessageSerializer,
     CategorySerializer,
     LocationSerializer,
     ContactFormSerializer
-    
 )
 
+from .permission import IsOwner
+
+# Set up logging
+logger = logging.getLogger(__name__)
 
 # Custom pagination class
 class PaginationView(pagination.PageNumberPagination):
@@ -79,18 +85,43 @@ class LocationListView(ListAPIView):
     serializer_class = LocationSerializer 
     
 
-class AddFlatView(APIView):
-    permission_classes = [IsAuthenticated]
+# class FamilyFlatCreateView(APIView):
+#     permission_classes = [IsAuthenticated]
+    
+#     def post(self, request, *args, **kwargs):
+#         serializer = FlatSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save(owner=request.user)
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def post(self, request):
-        if request.user.user_type != "owner":  # Only owners can add flats
-            return Response(
-                {"error": "Only owners can add flats"}, status=status.HTTP_403_FORBIDDEN
-            )
+# class BachelorFlatCreateView(APIView):
+#     permission_classes = [IsAuthenticated]
+    
+#     def post(self, request, *args, **kwargs):
+#         serializer = FlatSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save(owner=request.user)
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = FlatSerializer(data=request.data, context={"request": request})
+# class ShopFlatCreateView(APIView):
+#     permission_classes = [IsAuthenticated]
+    
+#     def post(self, request, *args, **kwargs):
+#         serializer = FlatSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save(owner=request.user)
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class FlatCreateView(APIView):
+    permission_classes = [IsAuthenticated, IsOwner]
+    
+    def post(self, request, *args, **kwargs):
+        serializer = FlatSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(owner=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -125,7 +156,7 @@ class OwnerFlatListView(ListAPIView):
 
 
 class OwnerFlatUpdateDeleteView(APIView):
-    """ Update or delete a specific flat (only by its owner) """
+    """Update or delete a specific flat (only by its owner)"""
     permission_classes = [IsAuthenticated]
 
     def get_object(self, flat_id, user):
@@ -137,28 +168,41 @@ class OwnerFlatUpdateDeleteView(APIView):
     def put(self, request, flat_id):
         flat = self.get_object(flat_id, request.user)
         if not flat:
-            return Response({"error": "Flat not found or unauthorized"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Flat not found or unauthorized"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
 
-        serializer = FlatSerializer(flat, data=request.data, partial=True, context={"request": request})
+        serializer = FlatSerializer(
+            flat, 
+            data=request.data, 
+            partial=True, 
+            context={"request": request}
+        )
         
         if serializer.is_valid():
-            # 🔹 Avoid extra queries by manually updating fields
-            for attr, value in serializer.validated_data.items():
-                setattr(flat, attr, value)
-
-            flat.save()  # 🔹 Only one save query instead of multiple updates
-
-            return Response(FlatSerializer(flat).data, status=status.HTTP_200_OK)
+            # Use the serializer's update method which handles nested relationships properly
+            updated_flat = serializer.save()
+            return Response(
+                FlatSerializer(updated_flat, context={"request": request}).data, 
+                status=status.HTTP_200_OK
+            )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, flat_id):
         flat = self.get_object(flat_id, request.user)
         if not flat:
-            return Response({"error": "Flat not found or unauthorized"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Flat not found or unauthorized"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
 
         flat.delete()
-        return Response({"message": "Flat deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            {"message": "Flat deleted successfully"}, 
+            status=status.HTTP_204_NO_CONTENT
+        )
 
 
 class RenterBookingListView(ListAPIView):
@@ -225,69 +269,99 @@ class FlatListView(ListAPIView):
 
 class SendMessageView(APIView):
     """✅ View for renters to send messages to flat owners"""
-
+    
     permission_classes = [IsAuthenticated]  # Only logged-in renters
-
+    
     def post(self, request, slug):
         """Handles message sending from renter to flat owner"""
-
-        # Optimize query by checking if the renter already messaged using Exists()
-        flat = (
-            Flat.objects.annotate(
-                already_messaged=Exists(
-                    Flat.renters_who_messaged.through.objects.filter(
-                        flat_id=OuterRef("pk"), user_id=request.user.id
+        
+        try:
+            # Optimize query by checking if the renter already messaged using Exists()
+            flat = (
+                Flat.objects.annotate(
+                    already_messaged=Exists(
+                        Flat.renters_who_messaged.through.objects.filter(
+                            flat_id=OuterRef("pk"), user_id=request.user.id
+                        )
                     )
                 )
+                .select_related("owner")  # Optimize foreign key lookup
+                .get(slug=slug)
             )
-            .select_related("owner")  # Optimize foreign key lookup
-            .get(slug=slug)
-        )
-
+        except Flat.DoesNotExist:
+            return Response(
+                {"error": "Flat not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        
+        # Check if user is trying to message their own flat
+        if flat.owner == request.user:
+            return Response(
+                {"error": "You cannot send a message to your own flat."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        
         if flat.already_messaged:
             return Response(
                 {"error": "You have already sent a message for this flat."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
+        
         serializer = MessageSerializer(data=request.data)
         if serializer.is_valid():
             validated_data = serializer.validated_data
-            owner_email = flat.owner.email  # Get owner's email
-
-            # Render HTML email template with dynamic data
-            email_html_content = render_to_string(
-                "emails/booking_email.html",
-                {
-                    "owner_name": flat.owner.first_name,
-                    "flat_title": flat.title,
-                    "first_name": validated_data["first_name"],
-                    "last_name": validated_data["last_name"],
-                    "email": validated_data["email"],
-                    "phone": validated_data["phone"],
-                    "message": validated_data["message"],
-                },
-            )
-
-            subject = f"Message from {validated_data['first_name']} {validated_data['last_name']} - Interested in Your Flat"
-
-            # Send email with both HTML & plain text versions
-            email_msg = EmailMultiAlternatives(
-                subject,
-                validated_data["message"],  # Plain text version (fallback)
-                f"EasyRent Support Team <{settings.EMAIL_HOST_USER}>",  # ✅ Shows "EasyRent" before sender email
-                [owner_email],
-            )
-            email_msg.attach_alternative(email_html_content, "text/html")
-            email_msg.send()
-
-            # 🔹 Mark renter as someone who has already sent a message (optimized bulk update)
-            flat.renters_who_messaged.add(request.user)
-
-            return Response(
-                {"success": "Message sent successfully"}, status=status.HTTP_200_OK
-            )
-
+            
+            # Validate that the owner has an email
+            if not flat.owner.email:
+                return Response(
+                    {"error": "Owner email not available. Cannot send message."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            
+            owner_email = flat.owner.email
+            
+            try:
+                # Render HTML email template with dynamic data
+                email_html_content = render_to_string(
+                    "emails/booking_email.html",
+                    {
+                        "owner_name": flat.owner.first_name or "Dear Owner",
+                        "flat_title": flat.title,
+                        "first_name": validated_data["first_name"],
+                        "last_name": validated_data["last_name"],
+                        "email": validated_data["email"],
+                        "phone": validated_data["phone"],
+                        "message": validated_data["message"],
+                    },
+                )
+                
+                subject = f"Message from {validated_data['first_name']} {validated_data['last_name']} - Interested in Your Flat"
+                
+                # Send email with both HTML & plain text versions
+                email_msg = EmailMultiAlternatives(
+                    subject,
+                    validated_data["message"],  # Plain text version (fallback)
+                    f"EasyRent Support Team <{settings.EMAIL_HOST_USER}>",
+                    [owner_email],
+                )
+                email_msg.attach_alternative(email_html_content, "text/html")
+                email_msg.send()
+                
+                # 🔹 Mark renter as someone who has already sent a message
+                flat.renters_who_messaged.add(request.user)
+                
+                return Response(
+                    {"success": "Message sent successfully"}, 
+                    status=status.HTTP_200_OK
+                )
+                
+            except Exception as e:
+                logger.error(f"Failed to send email for flat {flat.id}: {str(e)}")
+                return Response(
+                    {"error": "Failed to send message. Please try again later."},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

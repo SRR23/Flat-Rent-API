@@ -1,7 +1,10 @@
 
 from django.urls import path
 from .views import (
-    AddFlatView,
+    # FamilyFlatCreateView,
+    # BachelorFlatCreateView,
+    # ShopFlatCreateView,
+    FlatCreateView,
     OwnerFlatListView,
     OwnerFlatUpdateDeleteView,
     FlatDetailView,
@@ -19,7 +22,7 @@ from .views import (
 
 urlpatterns = [
     path('home/', HomeView.as_view(), name='home'),
-    path('owner/flats/add/', AddFlatView.as_view(), name='add-flat'),
+    path('flats/create/', FlatCreateView.as_view(), name='flat-create'),
     path('owner/flats_list/', OwnerFlatListView.as_view(), name='list-owner-flats'),
     path('owner/flats/<int:flat_id>/', OwnerFlatUpdateDeleteView.as_view(), name='update-delete-flat'),
     path('renter/bookings/', RenterBookingListView.as_view(), name='renter-bookings'),
