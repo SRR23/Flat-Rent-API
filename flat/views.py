@@ -22,9 +22,6 @@ from .models import (
 )
 from flat.serializers.all_flat import (
     FlatSerializer,
-    FamilySerializer, 
-    BachelorSerializer, 
-    ShopSerializer,
     MessageSerializer,
     CategorySerializer,
     LocationSerializer,
@@ -64,14 +61,19 @@ class PaginationView(pagination.PageNumberPagination):
 
 
 class HomeView(ListAPIView):
-    
-    queryset = (
-        Flat.objects.select_related("owner", "category", "location")
-        # .prefetch_related("renters_who_messaged")
-        .order_by("-created_at")[:6]  # Limit to latest 6 flats
-    )
     serializer_class = FlatSerializer
     permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        try:
+            return (
+                Flat.objects.select_related("owner", "category", "location")
+                .prefetch_related("renters_who_messaged")
+                .order_by("-created_at")[:6]  # Limit to latest 6 flats
+            )
+        except Exception as e:
+            logger.error(f"Error fetching queryset in HomeView: {str(e)}")
+            raise
 
 # List all Categories
 class CategoryListView(ListAPIView):
@@ -116,10 +118,8 @@ class LocationListView(ListAPIView):
 #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class FlatCreateView(APIView):
-    permission_classes = [IsAuthenticated, IsOwner]
-    
     def post(self, request, *args, **kwargs):
-        serializer = FlatSerializer(data=request.data)
+        serializer = FlatSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save(owner=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
