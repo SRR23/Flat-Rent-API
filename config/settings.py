@@ -158,7 +158,7 @@ REST_FRAMEWORK = {
 
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=85),  # Set the access token lifetime
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),  # Set the access token lifetime
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),    # Set the refresh token lifetime
     'ROTATE_REFRESH_TOKENS': False,                # Set to True if you want to issue a new refresh token on access token refresh
     'BLACKLIST_AFTER_ROTATION': True,              # Set to True if you want old refresh tokens to become invalid after use
@@ -178,8 +178,8 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = env("EMAIL_HOST_USER")  # Your email
-EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")  # Use an App Password if using Gmail
+EMAIL_HOST_USER = env("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
 
 
 
