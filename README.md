@@ -107,5 +107,5 @@ Follow these steps to set up and run the project locally:
     Django
     Django Rest Framework (DRF)
     Postgresql
-    Cloudinary # For store image
+    Cloudinary
     JWT Token Authentication
